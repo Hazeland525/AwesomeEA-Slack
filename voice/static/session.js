@@ -253,10 +253,20 @@ function setState(state) {
 
 // ── WebRTC ────────────────────────────────────────────────────────────────────
 async function startCall() {
+  let tokenUrl = "/token";
+  if (_passwordRequired) {
+    const pw = prompt("Enter demo password:");
+    if (pw === null) return; // user cancelled
+    tokenUrl = "/token?password=" + encodeURIComponent(pw);
+  }
+
   setState("calling");
 
-  const tokenResp = await fetch("/token");
-  if (!tokenResp.ok) throw new Error(`/token returned ${tokenResp.status}`);
+  const tokenResp = await fetch(tokenUrl);
+  if (!tokenResp.ok) {
+    const errData = await tokenResp.json().catch(() => ({}));
+    throw new Error(errData.error || `Request failed (${tokenResp.status})`);
+  }
   const tokenData = await tokenResp.json();
   const EPHEMERAL_KEY = tokenData.value;
   currentSessionId = tokenData.session_id || null;
@@ -454,11 +464,14 @@ startCall().catch((err) => {
   setState("error");
 });
 
+let _passwordRequired = false;
+
 fetch("/config")
   .then((r) => r.json())
   .then((d) => {
     const el = document.getElementById("workspaceCtx");
     if (el && d.workspace) el.textContent = `Connected to ${d.workspace}`;
     if (d.avatar_url) userAvatar.src = d.avatar_url;
+    if (d.password_required) _passwordRequired = true;
   })
   .catch(() => {});

@@ -71,6 +71,11 @@ PREFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pre
 # In-memory session action log: session_id -> list[action entry]
 session_log: dict[str, list[dict]] = {}
 
+# ── Demo protections ──────────────────────────────────────────────────────────
+MAX_SESSIONS = 20
+_session_counter = 0
+_session_counter_lock = threading.Lock()
+
 # Slack user id resolved once from SLACK_USER_TOKEN
 _cached_user_id: str | None = None
 _cached_first_name: str | None = None
@@ -435,11 +440,27 @@ def config():
             avatar_url = p.get("image_192") or p.get("image_72")
     except Exception:
         pass
-    return jsonify({"workspace": workspace, "avatar_url": avatar_url})
+    return jsonify({
+        "workspace": workspace,
+        "avatar_url": avatar_url,
+        "password_required": bool(os.environ.get("DEMO_PASSWORD")),
+    })
 
 
 @app.route("/token")
 def token():
+    # Password gate
+    demo_password = os.environ.get("DEMO_PASSWORD", "")
+    if demo_password and request.args.get("password", "") != demo_password:
+        return jsonify({"error": "Invalid password."}), 401
+
+    # Session cap
+    global _session_counter
+    with _session_counter_lock:
+        if _session_counter >= MAX_SESSIONS:
+            return jsonify({"error": "This demo has reached its session limit."}), 403
+        _session_counter += 1
+
     # Generate a fresh session and initialise its log
     session_id = str(uuid.uuid4())
     session_log[session_id] = []
