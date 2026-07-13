@@ -1,0 +1,333 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  height: 100%;
+  background: #1a1d21;
+}
+
+body {
+  min-height: 101dvh;
+  height: 101dvh;
+  background: #1a1d21;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Lato', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #fff;
+  user-select: none;
+  /* overscroll-behavior replaces overflow:hidden for scroll-lock.
+     overflow:hidden on body is a known iOS WebKit bug: it clips position:fixed
+     elements to the safe viewport (excluding home indicator), even with
+     viewport-fit=cover. overscroll-behavior:none prevents rubber-band
+     scrolling without that side effect. */
+  overscroll-behavior: none;
+  position: relative;
+}
+
+/* ── Phone frame wrapper ── */
+.phone-frame {
+  position: relative;
+  z-index: 1; /* sit above the z-index:0 .bg layer */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: none;
+  background-image: url('/static/background.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/* ── Background layer — single copy of the illustration ──
+   Direct child of <body> so no ancestor has transform/filter/contain that
+   would break position:fixed on iOS PWA.
+   Mobile: inset:0 covers the full viewport including safe areas.
+   Desktop: overridden to match the phone-frame shape exactly. */
+.bg {
+  position: fixed;
+  inset: 0;
+  /* Belt-and-suspenders: extend past the bottom safe area so the illustration
+     always covers the home indicator region, even if iOS clips fixed elements
+     to the safe viewport in some rendering modes. */
+  bottom: calc(0px - env(safe-area-inset-bottom, 0px));
+  z-index: 0;
+  /* background-image: url('/static/background.jpg'); */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ── Main centered column ── */
+.call-wrap {
+  position: relative;
+  z-index: 20;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 54px;
+  padding: 20px 14px 280px;
+}
+
+/* ── Title above tiles ── */
+.call-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.call-sub {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(0,0,0,0.50);
+}
+
+.call-name {
+  font-size: 28px;
+  font-weight: 600;
+  color: rgba(0,0,0,0.82);
+}
+
+/* ── Tiles ── */
+.tiles {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.tile {
+  flex: 1;
+  height: clamp(160px, 180px, 180px);
+  border-radius: 48px;
+  position: relative;
+  overflow: visible;
+  background: rgba(0,0,0,0.20);
+}
+
+/* inner clip so images stay rounded without clipping the ::after ring */
+.tile-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Speaking pulse — user tile gets .speaking, agent tile gets .pulsing from JS */
+.user-tile.speaking::after,
+#avatarWrap.pulsing::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 16px;
+  border: 3px solid rgba(255,255,255,0.88);
+  animation: tile-ring 1.8s ease-out infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes tile-ring {
+  0%   { opacity: 0.9; transform: scale(1.00); }
+  100% { opacity: 0;   transform: scale(1.06); }
+}
+
+/* Profile pictures — fill tile edge-to-edge */
+.tile-inner img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Tile name badge */
+.tile-lbl {
+  position: absolute;
+  bottom: 10px; left: 10px;
+  z-index: 4;
+  font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,0.95);
+  background: rgba(0,0,0,0.45);
+  padding: 4px 10px;
+  border-radius: 24px;
+  letter-spacing: 0.1px;
+}
+
+/* ── Join button (idle) ── */
+#callBtn {
+  padding: 18px 0;
+  width: min(95vw, 360px);
+  justify-content: center;
+  border-radius: 12px;
+  border: none;
+  background: #017A5D;
+  color: #fff;
+  font-family: 'Lato', sans-serif;
+  font-size: 18px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 5px 35px rgba(1,122,93,0.45);
+  white-space: nowrap;
+  transition: transform 0.1s;
+}
+#callBtn:active   { transform: scale(0.97); }
+#callBtn:disabled { opacity: 0.45; pointer-events: none; }
+
+/* ── In-call controls wrapper (buttons + subtitle) ── */
+.controls-col {
+  display: none; /* JS switches to flex when in call */
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* subtitle anchors to this */
+  width: 100%;
+}
+
+.bottom-bar {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.ctrl-btn {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(60,60,60,0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.1s;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.ctrl-btn:active { transform: scale(0.90); }
+
+
+.end-circle { background: rgba(224,30,90,0.85); }
+
+/* Subtitle / closed-captions area — absolute so it doesn't move siblings */
+.subtitle-area {
+  display: none;
+  position: absolute;
+  top: calc(100% + 36px);
+  left: 0;
+  right: 0;
+  padding: 0 20px;
+}
+.subtitle-area.visible { display: block; }
+
+.subtitle-clip {
+  overflow: hidden;
+  /* 3 lines at 18px / 1.45 line-height */
+  max-height: 78px;
+  position: relative;
+}
+
+.subtitle-text {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(0,0,0,0.82);
+  text-align: center;
+  line-height: 1.45;
+  /* text-shadow: 0 1px 6px rgba(0,0,0,0.55); */
+  transition: transform 0.4s ease;
+  will-change: transform;
+}
+
+/* ── Action toast ── */
+.action-toast {
+  position: absolute;
+  bottom: 64px;
+  left: 12px;
+  right: 12px;
+  z-index: 100;
+  background: #1a1d21;
+  color: #fff;
+  border-radius: 12px;
+  padding: 20px 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: none;
+}
+.action-toast.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.toast-icon { flex-shrink: 0; font-size: 16px; line-height: 1; }
+.toast-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+.toast-icon-svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  opacity: 0.9;
+}
+.toast-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toast-undo {
+  flex-shrink: 0;
+  color: #36C5F0;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 0 2px 8px;
+  font-size: 14px;
+  font-family: inherit;
+  display: none;
+}
+
+/* ── Desktop: render UI inside a phone-shaped frame ── */
+@media (min-width: 500px) {
+  body {
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Match the phone frame exactly: same size, centered with flex (no transform
+     on any ancestor), rounded so border-radius clips the background image. */
+  .bg {
+    width: 430px;
+    height: 932px;
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 44px;
+    overflow: hidden;
+  }
+
+  .phone-frame {
+    flex: none;
+    width: 430px;
+    height: 932px;
+    border-radius: 44px;
+    box-shadow:
+      0 40px 100px rgba(0,0,0,0.65),
+      0 0 0 1px rgba(255,255,255,0.07);
+  }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>awesome-ea</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="awesome-ea" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#527A68" />
+  <link rel="apple-touch-icon" href="/static/icon-180.png" />
+  <link rel="manifest" href="/static/manifest.json" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- Background layer — direct child of body so position:fixed works on iOS PWA -->
+  <div class="bg"></div>
+
+  <div class="phone-frame">
+  <div class="call-wrap">
+
+    <div class="call-header">
+      <span class="call-sub">Huddling with</span>
+      <span class="call-name">Awesome-EA</span>
+    </div>
+
+    <!-- Participant tiles -->
+    <div class="tiles">
+      <div class="tile user-tile" id="userTile">
+        <div class="tile-inner">
+          <img id="userAvatar" src="/static/placeholders/user.png" alt="You" />
+        </div>
+        <span class="tile-lbl">You</span>
+      </div>
+
+      <div class="tile agent-tile" id="avatarWrap">
+        <div class="tile-inner">
+          <img src="/static/placeholders/slack.png" alt="awesome-ea" />
+        </div>
+        <span class="tile-lbl">awesome-ea</span>
+      </div>
+    </div>
+
+    <!-- Join button (idle state) -->
+    <button id="callBtn" aria-label="Start voice session">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 18v-6a9 9 0 0 1 18 0v6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3v5zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3v5z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Join huddle
+    </button>
+
+    <!-- In-call controls (hidden until in call) -->
+    <div class="controls-col" id="controlsCol">
+      <div class="bottom-bar" id="bottomBar">
+        <button class="ctrl-btn" id="ccBtn" aria-label="Toggle captions">
+          <img id="ccIcon" src="/static/subtitle-off.svg" width="26" height="26" alt="Captions" />
+        </button>
+        <button class="ctrl-btn" id="micBtn" aria-label="Toggle mic">
+          <img id="micIcon" src="/static/mic.svg" width="26" height="26" alt="Mic" />
+        </button>
+        <button class="ctrl-btn end-circle" id="endBtn" style="display:none" aria-label="End call">
+          <img src="/static/end.svg" width="24" height="24" alt="End" />
+        </button>
+      </div>
+
+      <!-- CC subtitle — see subtitle.js to configure pace and line count -->
+      <div class="subtitle-area" id="subtitleArea">
+        <div class="subtitle-clip" id="subtitleClip">
+          <div class="subtitle-text" id="subtitleText"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.call-wrap -->
+
+  <!-- Action toast -->
+  <div id="actionToast" class="action-toast" role="status">
+    <span id="toastIcon" class="toast-icon"></span>
+    <span id="toastText" class="toast-text"></span>
+    <button id="toastUndo" class="toast-undo" aria-label="Undo">Undo</button>
+  </div>
+
+  </div><!-- /.phone-frame -->
+
+  <!-- Hidden elements for JS bindings -->
+  <span id="callStatus"   style="display:none"></span>
+  <span id="btnLabel"     style="display:none"></span>
+  <div  id="workspaceCtx" style="display:none"></div>
+  <div  id="transcriptEl" style="display:none"></div>
+
+  <audio id="remoteAudio" autoplay></audio>
+  <audio id="bgMusic" src="/static/morning-vibe2.mp3" loop preload="none"></audio>
+
+
+  <!-- Load order matters: subtitle and tools must be ready before session -->
+  <script src="/static/subtitle.js"></script>
+  <script src="/static/tools.js"></script>
+  <script src="/static/session.js"></script>
+
+</body>
+</html>
