@@ -440,20 +440,11 @@ def config():
             avatar_url = p.get("image_192") or p.get("image_72")
     except Exception:
         pass
-    return jsonify({
-        "workspace": workspace,
-        "avatar_url": avatar_url,
-        "password_required": bool(os.environ.get("DEMO_PASSWORD")),
-    })
+    return jsonify({"workspace": workspace, "avatar_url": avatar_url})
 
 
 @app.route("/token")
 def token():
-    # Password gate
-    demo_password = os.environ.get("DEMO_PASSWORD", "")
-    if demo_password and request.args.get("password", "") != demo_password:
-        return jsonify({"error": "Invalid password."}), 401
-
     # Session cap
     global _session_counter
     with _session_counter_lock:

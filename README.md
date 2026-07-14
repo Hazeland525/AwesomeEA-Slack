@@ -8,7 +8,7 @@ Awesome EA is a real-time voice AI executive assistant built on top of Slack. Co
 
 ▶ [Watch the demo on YouTube](https://youtu.be/zZA_D61BFc0)
 
-**Live demo:** [awesomeea-slack-production.up.railway.app](https://awesomeea-slack-production.up.railway.app) *(password required)*
+**Live demo:** [awesomeea-slack-production.up.railway.app](https://awesomeea-slack-production.up.railway.app)
 
 ## Features
 
