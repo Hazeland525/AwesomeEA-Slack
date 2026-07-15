@@ -95,10 +95,19 @@ Enable **Socket Mode** and subscribe to bot events: `app_home_opened`, `app_ment
 
 ## Running
 
+The voice server is deployed on Railway — no ngrok needed. Just run the Slack bot locally:
+
 ```bash
 # Terminal 1 — Slack bot
 slack run
+```
 
+The "🎧 Morning Huddle" button in Slack will open the live voice UI at [awesomeea-slack-production.up.railway.app](https://awesomeea-slack-production.up.railway.app) on any device.
+
+<details>
+<summary>Running the voice server locally (optional)</summary>
+
+```bash
 # Terminal 2 — Voice server
 python voice/server.py
 
@@ -106,9 +115,9 @@ python voice/server.py
 ngrok http 5050
 ```
 
-Copy the ngrok URL → set `VOICE_PAGE_URL` in `.env` → restart `voice/server.py`.
+~~Copy the ngrok URL → set `VOICE_PAGE_URL` in `.env` → restart `voice/server.py`.~~
 
-Open the ngrok URL on any device to use the voice huddle.
+</details>
 
 ## Slash Commands
 
